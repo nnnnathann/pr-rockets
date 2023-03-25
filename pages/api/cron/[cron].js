@@ -31,7 +31,7 @@ async function prRockets({
   );
 
   if (prsWithRocket.length === 0) {
-    console.log("No rocket emoji kudos for the last week");
+    await sendToSlack(SLACK_WEBHOOK_URL, ":warning: none of this week's PRs were rocketed!");
     return { ok: true };
   }
 
