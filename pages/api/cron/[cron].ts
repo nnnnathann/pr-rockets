@@ -50,14 +50,14 @@ async function prRockets({ GITHUB_TOKEN, SLACK_WEBHOOK_URL, GITHUB_OWNER, GITHUB
 }
 
 async function getPullRequestsWithRocketEmoji(token, owner, repo) {
-  const twoWeeksAgo = new Date(Date.now() - 12096e5).toISOString();
+  const oneWeekAgo = new Date(Date.now() - (60*60*24*7*1000)).toISOString();
   const headers = {
     Authorization: `token ${token}`,
     Accept: "application/vnd.github+json",
   };
   const params = new URLSearchParams({
     state: "all",
-    since: twoWeeksAgo,
+    since: oneWeekAgo,
   });
   const response = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/pulls?${params}`,
