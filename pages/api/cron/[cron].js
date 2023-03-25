@@ -31,7 +31,7 @@ async function prRockets({
   );
 
   if (prsWithRocket.length === 0) {
-    console.log("No rocket emoji kudos for the last 2 weeks");
+    console.log("No rocket emoji kudos for the last week");
     return { ok: true };
   }
 
