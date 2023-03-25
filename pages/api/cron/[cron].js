@@ -1,24 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from "next/server";
 
 export const config = {
-  runtime: 'edge',
-}
+  runtime: "edge",
+};
 
-export default async function handler(req: NextRequest) {
-  const cron = req.nextUrl.searchParams.get('cron')
-  if (!cron) return new Response('No cron provided', { status: 400 })
+export default async function handler(req) {
+  const cron = req.nextUrl.searchParams.get("cron");
+  if (!cron) return new Response("No cron provided", { status: 400 });
   const response = await prRockets({
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     SLACK_WEBHOOK_URL: process.env.SLACK_WEBHOOK_URL,
     GITHUB_OWNER: process.env.GITHUB_OWNER,
-    GITHUB_REPO: process.env.GITHUB_REPO
-  })
+    GITHUB_REPO: process.env.GITHUB_REPO,
+  });
   return new NextResponse(JSON.stringify(response), {
     status: 200,
-  })
+  });
 }
 
-async function prRockets({ GITHUB_TOKEN, SLACK_WEBHOOK_URL, GITHUB_OWNER, GITHUB_REPO }) {
+async function prRockets({
+  GITHUB_TOKEN,
+  SLACK_WEBHOOK_URL,
+  GITHUB_OWNER,
+  GITHUB_REPO,
+}) {
   const prsWithRocket = await getPullRequestsWithRocketEmoji(
     GITHUB_TOKEN,
     GITHUB_OWNER,
@@ -46,11 +51,13 @@ async function prRockets({ GITHUB_TOKEN, SLACK_WEBHOOK_URL, GITHUB_OWNER, GITHUB
 
   await sendToSlack(SLACK_WEBHOOK_URL, message);
   console.log("results sent to Slack");
-  return { ok: true }
+  return { ok: true };
 }
 
 async function getPullRequestsWithRocketEmoji(token, owner, repo) {
-  const oneWeekAgo = new Date(Date.now() - (60*60*24*7*1000)).toISOString();
+  const oneWeekAgo = new Date(
+    Date.now() - 60 * 60 * 24 * 7 * 1000
+  ).toISOString();
   const headers = {
     Authorization: `token ${token}`,
     Accept: "application/vnd.github+json",
