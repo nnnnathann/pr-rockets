@@ -31,7 +31,10 @@ async function prRockets({
   );
 
   if (prsWithRocket.length === 0) {
-    await sendToSlack(SLACK_WEBHOOK_URL, ":warning: none of this week's PRs were rocketed!");
+    await sendToSlack(
+      SLACK_WEBHOOK_URL,
+      ":warning: none of this week's PRs were rocketed!"
+    );
     return { ok: true };
   }
 
@@ -80,7 +83,7 @@ async function getPullRequestsWithRocketEmoji(token, owner, repo) {
     const prNumber = pr.number;
     const reactionsHeaders = {
       Authorization: `token ${token}`,
-      Accept: "application/vnd.github.squirrel-girl-preview+json",
+      Accept: "application/vnd.github+json",
     };
     const reactionsResponse = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/reactions`,
