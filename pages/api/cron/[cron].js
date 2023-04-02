@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import { Octokit, App } from "octokit";
 
 export const config = {
   runtime: "edge",
@@ -58,40 +59,32 @@ async function prRockets({
 }
 
 async function getPullRequestsWithRocketEmoji(token, owner, repo) {
+  const octokit = new Octokit({ auth: token });
+  const pulls = await octokit.rest.pulls.list({
+    sort: "updated",
+    direction: "desc",
+    state: "closed",
+    owner,
+    repo,
+    per_page: 100,
+  });
   const oneWeekAgo = new Date(
     Date.now() - 60 * 60 * 24 * 7 * 1000
   ).toISOString();
-  const headers = {
-    Authorization: `token ${token}`,
-    Accept: "application/vnd.github+json",
-  };
-  const params = new URLSearchParams({
-    state: "all",
-    since: oneWeekAgo,
-  });
-  const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/pulls?${params}`,
-    { headers }
-  );
-  const pullRequests = await response.json();
 
   const pullRequestsWithRocket = [];
-  for (const pr of pullRequests) {
-    if (!pr.merged_at) {
+  for (const pr of pulls.data) {
+    if (pr.merged_at < oneWeekAgo) {
       continue;
     }
     const prNumber = pr.number;
-    const reactionsHeaders = {
-      Authorization: `token ${token}`,
-      Accept: "application/vnd.github+json",
-    };
-    const reactionsResponse = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/issues/${prNumber}/reactions`,
-      { headers: reactionsHeaders }
-    );
-    const reactions = await reactionsResponse.json();
+    const reactions = await octokit.rest.reactions.listForIssue({
+      issue_number: prNumber,
+      owner,
+      repo,
+    });
 
-    for (const reaction of reactions) {
+    for (const reaction of reactions.data) {
       if (
         reaction.content === "rocket" &&
         reaction.user.login !== pr.user.login
